@@ -36,20 +36,37 @@ print(f"Tiempo total en el aire: {t_total:.2f} s")
 
 # Configurar la animación
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.set_xlim(0, alcance + 1)
-ax.set_ylim(0, altura_maxima + 1)
+ax.set_xlim(0, alcance + 5)
+ax.set_ylim(0, altura_maxima + 5)
 ax.set_title("Simulación de Tiro Parabólico")
 ax.set_xlabel("Distancia horizontal (m)")
 ax.set_ylabel("Altura (m)")
 
+# Dibujar lanzador y ángulo
+lanzador = ax.plot(0, altura_inicial, 's', color='brown', markersize=20, label="Lanzador")[0]
+angle_arrow = ax.arrow(0, altura_inicial, 
+                       np.cos(angulo_rad) * 5, 
+                       np.sin(angulo_rad) * 5, 
+                       head_width=1, head_length=2, fc='green', ec='green', label="Ángulo")
+
 trajectory, = ax.plot([], [], 'b-', lw=2, label="Trayectoria")
 ball, = ax.plot([], [], 'ro', markersize=8, label="Bola")
+impact_point, = ax.plot([], [], 'gx', markersize=10, label="Impacto")
+result_text = ax.text(0.5, 0.95, "", transform=ax.transAxes, fontsize=12, va='top')
 
 # Función de actualización para la animación
 def update(frame):
+    # Actualizar trayectoria y pelota
     trajectory.set_data(x[:frame], y[:frame])
     ball.set_data([x[frame]], [y[frame]])  # Asegurar que se pase como lista
-    return trajectory, ball
+    
+    # Mostrar el punto de impacto y resultados cuando llegue al final
+    if frame == len(t) - 1:
+        impact_point.set_data([alcance], [0])
+        result_text.set_text(
+            f"Alcance: {alcance:.2f} m\nAltura Máxima: {altura_maxima:.2f} m\nTiempo Total: {t_total:.2f} s"
+        )
+    return trajectory, ball, impact_point, result_text
 
 # Crear animación
 ani = FuncAnimation(fig, update, frames=len(t), interval=20, blit=True)
